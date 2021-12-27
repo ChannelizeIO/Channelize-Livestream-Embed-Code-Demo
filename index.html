@@ -1,175 +1,181 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
 
-<head>
-	<title>Parcel Sandbox</title>
-	<meta charset="UTF-8" />
-</head>
+  <body>
+    <div id="app"></div>
 
-<body>
-	<div id="app"></div>
+    <script src="src/index.js"></script>
 
-	<script src="src/index.js">
-	</script>
+    <div id="root"></div>
+    <button onclick="onClick('EVENT_ID')">
+      Join the event
+    </button>
 
-<div id="root"></div>
-<button onclick="onClick('EVENT_ID')">
-  Join the event
-</button>
+    <script>
+      function onClick(eventId) {
+        window.channelizeLivebroadcastEmbedUI.open({
+          eventId: eventId
+        });
+      }
 
-<script>
-function onClick(eventId) {
-  window.channelizeLivebroadcastEmbedUI.open({
-    eventId: eventId
-  });
-}
+      (function (d, s, id) {
+        var js,
+          fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://cdn.channelize.io/live-broadcast/embed/prod/embed.js";
+        fjs.parentNode.insertBefore(js, fjs);
+        window.initChannelizeLivebroadcastOptions = {
+          publicKey: "PUBLIC_KEY",
+          mountDiv: document.getElementById("root"),
 
-(function(d, s, id) {
-     var js, fjs = d.getElementsByTagName(s)[0];
-     if (d.getElementById(id)) return;
-     js = d.createElement(s); js.id = id;
-     js.src = "https://cdn.channelize.io/live-broadcast/embed/prod/embed.js";
-     fjs.parentNode.insertBefore(js, fjs);
-     window.initChannelizeLivebroadcastOptions = {
-       publicKey: "PUBLIC_KEY",
-       mountDiv: document.getElementById("root"),
- 
-       // Set true if we want to open for specific event id by default
-       // defaultOpen: {
-       //   eventId: 'EVENT_ID',
-       // },
- 
-       settings: {
-         locale: 'en',
-         cartUrl: "https://yourstore.com/cart", // your website cart url
-         share: {
-          baseUrl: `https://yourstore.com/pages/streams` // your website page url to be shared where shows are listed.
-         }
-       },
- 
-       // Optional, required only for cart integration. 
-       // This function is invoked when the event is rendered. 
-       // This function should be used to get detailed product information 
-       // which will help in cart integration.
-       doFetchProductsRequest: function(event, productUpdateCb) {
-         console.log("doFetchProductsRequest");
- 
-         const { products } = event;
- 
-         return products.map(async (product) => {
-           try {
-             productUpdateCb(async () => {
-               let yourProduct = await yourGetProductMethod(product.sku);
+          // Set true if we want to open for specific event id by default
+          // defaultOpen: {
+          //   eventId: 'EVENT_ID',
+          // },
 
-                // NOTE: For cart integration variants is required
-                // So, for simple type product which doesn't has any variant, you have to set the product itself in the variants
-                // yourProduct.variants = [yourProduct]
+          settings: {
+            locale: "en",
+            cartUrl: "https://yourstore.com/cart", // your website cart url
+            share: {
+              baseUrl: `https://yourstore.com/pages/streams` // your website page url to be shared where shows are listed.
+            }
+          },
 
-               // Here, product methods are explained. 
-               return product.
-                 setDescription(yourProduct.description). // Product description
-                 setCurrency(yourProduct.currency). // Here, you should set the currency which will be displayed with the product.
-                 setSku(yourProduct.id). // sku, you should set product identifier like id.
-                 
-                 // Here, you can set variant options or attributes (like color, size, etc) with their values.
-                 setVariantOptions(O =>
-                   yourProduct.options.map(option => {
-                     return new O().
-                     setTitle(option.title).
-                     setValues(option.values)
-                   })
-                 ).
+          // Optional, required only for cart integration.
+          // This function is invoked when the event is rendered.
+          // This function should be used to get detailed product information
+          // which will help in cart integration.
+          doFetchProductsRequest: function (event, productUpdateCb) {
+            console.log("doFetchProductsRequest");
 
-                 // Here, you can set variants of product
-                 setVariants(V =>
-                   yourProduct.variants.map(variant =>
-                     new V().
-                     setTitle(variant.title). // Title of variant
-                     setImages(yourProduct.images). // Array of image URLs like [https://yourstore.com/image1, https://yourstore.com/image2]
-                     setLatestPrice(variant.latest_price). // Here, you should set the sale price. If there is no sale price, you can set the original price.
-                     setOriginalPrice(variant.original_price). // Here, you should set the original price.
-                     setCurrency(currency). // The currency of variant
-                     setSku(variant.id). // sku, you should set product identifier like id.
-                     setOptions(variant.options). // Array of options which this variant has like [red, s], [yellow, m]
-                     setInStock(variant.setInStock) // Boolean value
-                   )
-                 )
-             });
-           } catch(err) {
-             productUpdateCb(false);
-           }
-         });
-       },
- 
-       // Optional, required only for cart integration. 
-       // This function is invoked when the event is rendered. 
-       // This function should be used to get cart details 
-       // which will help in cart integration. 
-       // This function is also invoked just after the user adds the product in the cart.
-       doFetchCartRequest: async function(event, callback) {
-         try {
-           console.log("doFetchCartRequest")
-           const yourCart = await yourGetCartMethod();
-           callback(Cart =>
-             new Cart().
-             setItems(I =>
-               yourCart.items.map(item =>
-                 new I().
-                 setProductSku(item.product_id). // Set product id
-                 setVariantSku(item.variant_id). // Set variant id in case of variant
-                 setQuantity(item.quantity) // Set quantity
-               )
-             ).
-             setItemCount(yourCart.item_count). //
-             setTotalOriginalPrice(yourCart.original_total_price). // This is the original price before discount
-             setTotalLatestPrice(yourCart.total_price) // This is the final price after discount
-           )
-         } catch(err) {
-           console.log("err", err);
-           callback(false)
-         }
-       },
- 
-       // Optional, This function is invoked on clicking on "Add to Cart" button
-       addToCartRequest: async function(event, callback) {
-         try {
-           console.log("addToCartRequest")
-           const { items } = event;
-           const res = await yourAddToCartMethod(items);
+            const { products } = event;
 
-           // This is the successful response
-           if (res.items) {
-             return callback(true);
-           }
+            return products.map(async (product) => {
+              try {
+                productUpdateCb(async () => {
+                  let yourProduct = await yourGetProductMethod(product.sku);
 
-           // If your API doesn't add product in the cart due to any reason
-           if(res.description) {
-             return callback(false, {reason: res.description});
-           }
-         } catch(err) {
-           callback(false);
-         }
-       },
- 
-       // Optional, This function is invoked when any product is added in the cart
-       onCartUpdated: function (cart) {
-         console.log('onCartUpdated', cart);
-       },
- 
-       // Optional, This function is invoked when non-loggedin use try to watch live private show
-       whenNotAllowedToWatch: function(liveBroadcast) {
-         console.log("whenNotAllowedToWatch");
-       },
- 
-       // Optional, Invoke on successful loading of Channelize.io live broadcast embed UI and 
-       // the UI has connected with channelize.io server
-       onLoad: function(payload) {
-         console.log("loaded");
-       },
-     };
-   }(document, "script", "channelize-livebroadcast-id"));
-</script>
+                  // NOTE: For cart integration variants is required
+                  // So, for simple type product which doesn't has any variant, you have to set the product itself in the variants
+                  // yourProduct.variants = [yourProduct]
 
-</body>
+                  // Here, product methods are explained.
+                  return (
+                    product
+                      .setDescription(yourProduct.description) // Product description
+                      .setCurrency(yourProduct.currency) // Here, you should set the currency which will be displayed with the product.
+                      .setSku(yourProduct.id) // sku, you should set product identifier like id.
+                      // Here, you can set variant options or attributes (like color, size, etc) with their values.
+                      .setOptions((O) =>
+                        yourProduct.options.map((option) => {
+                          return new O()
+                            .setName(option.name) // option name like color, size etc.
+                            .setValues(option.values); // Array of option values like [red, black], [s, m, l] etc.
+                        })
+                      )
+                      // Here, you can set variants of product
+                      .setVariants((V) =>
+                        yourProduct.variants.map(
+                          (variant) =>
+                            new V()
+                              .setTitle(variant.title) // Title of variant
+                              .setImages(yourProduct.images) // Array of image URLs like [https://yourstore.com/image1, https://yourstore.com/image2]
+                              .setLatestPrice(variant.latest_price) // Here, you should set the sale price. If there is no sale price, you can set the original price.
+                              .setOriginalPrice(variant.original_price) // Here, you should set the original price.
+                              .setCurrency(currency) // The currency of variant
+                              .setSku(variant.id) // sku, you should set product identifier like id.
+                              .setOptions(
+                                variant.options.map((option) => ({
+                                  name: option.name, // Variant option name like color, size etc.
+                                  value: option.value // variant option value like black, small etc.
+                                }))
+                              ) // Array of options which this variant has like [{name: color, value: "black"}], [yellow, m]
+                              .setInStock(variant.setInStock) // Boolean value
+                        )
+                      )
+                  );
+                });
+              } catch (err) {
+                productUpdateCb(false);
+              }
+            });
+          },
 
+          // Optional, required only for cart integration.
+          // This function is invoked when the event is rendered.
+          // This function should be used to get cart details
+          // which will help in cart integration.
+          // This function is also invoked just after the user adds the product in the cart.
+          doFetchCartRequest: async function (event, callback) {
+            try {
+              console.log("doFetchCartRequest");
+              const yourCart = await yourGetCartMethod();
+              callback(
+                (Cart) =>
+                  new Cart()
+                    .setItems((I) =>
+                      yourCart.items.map(
+                        (item) =>
+                          new I()
+                            .setProductSku(item.product_id) // Set product id
+                            .setVariantSku(item.variant_id) // Set variant id in case of variant
+                            .setQuantity(item.quantity) // Set quantity
+                      )
+                    )
+                    .setItemCount(yourCart.item_count) //
+                    .setTotalOriginalPrice(yourCart.original_total_price) // This is the original price before discount
+                    .setTotalLatestPrice(yourCart.total_price) // This is the final price after discount
+              );
+            } catch (err) {
+              console.log("err", err);
+              callback(false);
+            }
+          },
+
+          // Optional, This function is invoked on clicking on "Add to Cart" button
+          addToCartRequest: async function (event, callback) {
+            try {
+              console.log("addToCartRequest");
+              const { items } = event;
+              const res = await yourAddToCartMethod(items);
+
+              // This is the successful response
+              if (res.items) {
+                return callback(true);
+              }
+
+              // If your API doesn't add product in the cart due to any reason
+              if (res.description) {
+                return callback(false, { reason: res.description });
+              }
+            } catch (err) {
+              callback(false);
+            }
+          },
+
+          // Optional, This function is invoked when any product is added in the cart
+          onCartUpdated: function (cart) {
+            console.log("onCartUpdated", cart);
+          },
+
+          // Optional, This function is invoked when non-loggedin use try to watch live private show
+          whenNotAllowedToWatch: function (liveBroadcast) {
+            console.log("whenNotAllowedToWatch");
+          },
+
+          // Optional, Invoke on successful loading of Channelize.io live broadcast embed UI and
+          // the UI has connected with channelize.io server
+          onLoad: function (payload) {
+            console.log("loaded");
+          }
+        };
+      })(document, "script", "channelize-livebroadcast-id");
+    </script>
+  </body>
 </html>
