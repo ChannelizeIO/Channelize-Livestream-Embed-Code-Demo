@@ -3,6 +3,7 @@
   <head>
     <title>Parcel Sandbox</title>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
   </head>
 
   <body>
@@ -33,6 +34,8 @@
         window.initChannelizeLivebroadcastOptions = {
           publicKey: "PUBLIC_KEY",
           mountDiv: document.getElementById("root"),
+          userId: "LOGGED_IN_USER_ID", // Optional, not required for anonymous user
+          accessToken: "ACCESS_TOKEN_OF_LOGGED_IN_USER", // Optional, not required for anonymous user, reference link: https://docs.channelize.io/platform-api-admin-access-tokens/
 
           // Set true if we want to open for specific event id by default
           // defaultOpen: {
